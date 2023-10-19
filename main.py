@@ -1,7 +1,12 @@
-from classes import *
+import csv
+from vendingmachine import VendingMachine, Item, Money
+from transactions import Transaction, TransType, ErrorType
+from customer import Customer
+from merchant import Merchant
 
 
 def greeting(vm: VendingMachine) -> str:
+    """Greeting function with list of base actions"""
     print("\nЧто вы хотите сделать?")
     print("1. Посмотреть доступные продукты")
     if vm.items:
@@ -15,6 +20,7 @@ def greeting(vm: VendingMachine) -> str:
 
 
 def greeting_merchant(vm: VendingMachine) -> str:
+    """Greeting function with list of merchant actions"""
     print("\nЧто вы хотите сделать?")
     print("1. Добавить товар")
 
@@ -33,9 +39,8 @@ def greeting_merchant(vm: VendingMachine) -> str:
     return choice
 
 
-def buy_item(customer: Customer,
-             vm: VendingMachine):  # Функция обработки последовательности внесения средств и покупки товара
-
+def buy_item(customer: Customer, vm: VendingMachine):
+    """Function processing sequence of interactions with customer to buy vm item"""
     user_bill = input('Внесите деньги, укажите номинал вносимой купюры:')
     while not user_bill.isdigit() or int(user_bill) not in vm.change.keys():
         user_bill = input('Вы внесли не деньги, внесите купюру:')
@@ -107,6 +112,7 @@ def buy_item(customer: Customer,
 
 
 def check_bill_denomination(user_input: str, vm: VendingMachine) -> bool:
+    """Function to check if item price is correct"""
     if not user_input.isdigit():
         return False
 
@@ -119,6 +125,7 @@ def check_bill_denomination(user_input: str, vm: VendingMachine) -> bool:
 
 
 def merchant_add_item(merchant: Merchant, vm: VendingMachine):
+    """Function add item to vm by merchant"""
     print('\nВведите параметры товара:')
 
     item_code = input('Код: ')
@@ -153,6 +160,7 @@ def merchant_add_item(merchant: Merchant, vm: VendingMachine):
 
 
 def merchant_remove_item(merchant: Merchant, vm: VendingMachine):
+    """Function to remove item from vm by merchant"""
     merchant.show_items()
     user_input = input('\nВведите код товара, который требуется убрать:')
 
@@ -172,6 +180,7 @@ def merchant_remove_item(merchant: Merchant, vm: VendingMachine):
 
 
 def merchant_add_change(merchant: Merchant, vm: VendingMachine):
+    """Function to add change to vm by merchant"""
     user_bill = input('\nУкажите номинал купюры для внесения:')
     while not user_bill.isdigit() or int(user_bill) not in vm.change.keys():
         print('Указано недействительное значение. Повторите ввод.')
@@ -192,11 +201,12 @@ def merchant_add_change(merchant: Merchant, vm: VendingMachine):
 
 
 def merchant_withdraw_cash(merchant: Merchant, vm: VendingMachine):
+    """Function to withdraw cash from vm by merchant"""
     merchant.show_change_stock()
 
     temp_change = {}
-    for key, money in vm.change.items():
-        temp_change[key] = money.amount
+    for money in vm.change.values():
+        temp_change[money.bill] = money.amount
 
     transaction = Transaction(trans_type=TransType.MERCHANT_WITHDRAW, item=None,
                               cash=None, change=temp_change, result=True,
@@ -204,11 +214,12 @@ def merchant_withdraw_cash(merchant: Merchant, vm: VendingMachine):
     vm.add_transaction(transaction)
 
     merchant.withdraw_cash()
-    print('Деньги были успешно изъяты!')
+    print('\nДеньги были успешно изъяты:')
     merchant.show_change_stock()
 
 
 def main():
+    """Main function to control all the interactions and vending machine entities"""
     vm = VendingMachine()
     merchant = Merchant(vm)
     customer = Customer(vm)
