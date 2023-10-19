@@ -3,6 +3,7 @@ from vendingmachine import VendingMachine, Item, Money
 
 class Customer:
     """Class representing customer of vending machine"""
+
     def __init__(self, vm: VendingMachine):
         self.vm = vm
         self.credit = 0

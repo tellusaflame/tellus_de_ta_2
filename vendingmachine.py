@@ -3,6 +3,7 @@ import csv
 
 class Item:
     """Class representing some form of goods"""
+
     def __init__(self, code: int, name: str, price: int, amount: int):
         self.code = code
         self.name = name
@@ -12,6 +13,7 @@ class Item:
 
 class Money:
     """Class representing some form of money"""
+
     def __init__(self, bill: int, amount: int):
         self.bill = bill
         self.amount = amount
@@ -19,6 +21,7 @@ class Money:
 
 class VendingMachine:
     """Class representing a vending machine and its structure"""
+
     def __init__(self):
         self.items = {
             1: Item(code=1, name="Mars", price=10, amount=10),
@@ -50,27 +53,32 @@ class VendingMachine:
         self.transactions[self.transaction_counter] = transaction
         self.transaction_counter += 1
 
-        with open("transactions.csv", mode='a', newline='', encoding='windows-1251') as file:
-            writer = csv.writer(file, delimiter=';')
+        with open(
+            "transactions.csv", mode="a", newline="", encoding="windows-1251"
+        ) as file:
+            writer = csv.writer(file, delimiter=";")
 
             writer.writerow(
-                [transaction.timestamp,
-                 self.transaction_counter,
-                 transaction.trans_type,
-                 transaction.item.code if transaction.item else '',
-                 transaction.item.name if transaction.item else '',
-                 transaction.item.price if transaction.item else '',
-                 transaction.item.amount if transaction.item else '',
-                 transaction.cash.bill if transaction.cash else '',
-                 transaction.cash.amount if transaction.cash else '',
-                 transaction.change if transaction.change else '',
-                 transaction.result,
-                 transaction.error])
+                [
+                    transaction.timestamp,
+                    self.transaction_counter,
+                    transaction.trans_type,
+                    transaction.item.code if transaction.item else "",
+                    transaction.item.name if transaction.item else "",
+                    transaction.item.price if transaction.item else "",
+                    transaction.item.amount if transaction.item else "",
+                    transaction.cash.bill if transaction.cash else "",
+                    transaction.cash.amount if transaction.cash else "",
+                    transaction.change if transaction.change else "",
+                    transaction.result,
+                    transaction.error,
+                ]
+            )
 
     def show_items(self):
         """Function to print all the available goods"""
         for item in self.items.values():
-            print(str(item.code) + ' | ' + item.name + ' | ' + str(item.price))
+            print(str(item.code) + " | " + item.name + " | " + str(item.price))
 
     def add_item(self, item: Item):
         """Function to add new (or replace existing) goods position"""
@@ -97,7 +105,7 @@ class VendingMachine:
     def get_change_stock(self):
         """Function to print an actual change stock of vending machine"""
         for money in self.change.values():
-            print(str(money.bill) + ': ' + str(money.amount))
+            print(str(money.bill) + ": " + str(money.amount))
 
     def get_customer_change(self, customer_change: dict):
         """Function to process customer change"""
