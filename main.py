@@ -116,12 +116,9 @@ def check_bill_denomination(user_input: str, vm: VendingMachine) -> bool:
     if not user_input.isdigit():
         return False
 
-    for bill in vm.change.keys():
-        if bill // int(user_input) >= 1:
-            pass
-        else:
-            return False
-    return True
+    for money in vm.change.values():
+        result = int(user_input) % money.bill == 0
+    return result
 
 
 def merchant_add_item(merchant: Merchant, vm: VendingMachine):

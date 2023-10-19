@@ -50,7 +50,7 @@ class VendingMachine:
         self.transactions[self.transaction_counter] = transaction
         self.transaction_counter += 1
 
-        with open("transactions.csv", mode='a', newline='', encoding='utf8') as file:
+        with open("transactions.csv", mode='a', newline='', encoding='windows-1251') as file:
             writer = csv.writer(file, delimiter=';')
 
             writer.writerow(
