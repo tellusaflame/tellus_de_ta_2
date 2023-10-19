@@ -1,17 +1,84 @@
-## Test Assignment: Vending Machine Program
+## Vending Machine
 
-### Overview
+### Описание
 
-The objective of this assignment is to simulate a vending machine using principles of Object-Oriented Programming (OOP) in Python. The program should have the capability to interact with customers and merchants differently and keep track of the transactions.
+Данный скрипт симулирует работу вендингового аппарата. 
+Интерфейс взаимодействия с программой - текстовый ввод данных. Скрипт включает в себя проверку на некорректный ввод данных со стороны пользователя.
 
-#### Requirements:
-- The program should be written in Python using OOP principles.
-- The code should be well-structured with classes and functions for different features of the vending machine.
-- The code should be commented appropriately for understanding and readability.
-- Error handling should be integrated for invalid inputs or failed operations.
-- The program should be tested to ensure all features are working as expected.
+#### Требования:
+- Для работы скрипта не требуется установка внешних зависимостей
+- Все операции производятся через взаимодействие с текстовым интерфейсом по типу запрос-ответ.
   
-#### Deliverables:
-- The final Python script for the vending machine program.
-- A brief report documenting your design decisions and any challenges faced during the assignment, and how you overcame them.
-- Test cases you used to validate the functionality of your program.
+#### Использование:
+##### Базовая информация
+- Скрипт использует предустановленные значения для набора товара в машине, а также для "наличных" в машине.
+- Каждый товар имеет следующие характеристики: номер позиции, наименование, стоиомсть, количество.
+- Условные номиналы купюр, представленных в машине: 5000, 2000, 1000, 500, 200, 100, 50, 10. Добавить иные через взаимодействие со скриптом нельзя.
+- Стоимость товара - целое число, составленное из купюр выше.
+
+
+##### Запуск скрипта, основные пункты меню
+После запуска скрипта программа предложит к выбору следующие пункты меню:
+
+![image](https://github.com/tellusaflame/tellus_de_ta_2/assets/141950251/d022628f-fb7d-4468-919c-f13d75ea2c2e)
+
+Описание пунктов:
+1. Выводит текущее содержимое товаров автомата:
+     
+     ![image](https://github.com/tellusaflame/tellus_de_ta_2/assets/141950251/aeb3ccb1-2c1e-43a3-bfe4-8d9d0a6ffbdb)
+2. Меню для запуска процедуры выбора и приобретения товара.
+ 
+3. Меню для проведения операций обслуживания машины (добавление товара, наличных, и т.д.):
+     
+     ![image](https://github.com/tellusaflame/tellus_de_ta_2/assets/141950251/662fcdfa-c52b-49e7-9619-eecf8c4b90d7)
+
+4. Завершение работы скрипта.
+
+
+##### Процедура покупки товара
+После выбора пункта 2 основного меню программа предлагает последовательность приобретения товара.
+Для покупки товара необходимо: 
+1. Внести деньги:
+   
+![image](https://github.com/tellusaflame/tellus_de_ta_2/assets/141950251/fa2a11f0-5f0c-4b5f-b7f7-91181c85415d)
+
+2. Далее можно продолжить внесение средств, либо перейти к выбору товара через ввод пустой строки:
+
+![image](https://github.com/tellusaflame/tellus_de_ta_2/assets/141950251/cad96cfc-b28d-49f6-b545-f6f1dc0cb90a)
+
+3. Далее необходимо указать номер позиции желаемого товара:
+
+   ![image](https://github.com/tellusaflame/tellus_de_ta_2/assets/141950251/4fe38c37-55c8-43cc-9302-94e42f757e42)
+
+4. В зависимости от внесенного количества денег и выбранного товара будут преложены разные варианты развития событий. В случае текущего примера, внесенных средств достаточно для приобретения выбранного товара, а также есть достаточный объем средств для выдачи сдачи. Программа подтвердит выбор и укажет объем выданной сдачи покупателю:
+
+   ![image](https://github.com/tellusaflame/tellus_de_ta_2/assets/141950251/5091c85d-18c3-4aa3-8e72-366af4ab0a42)
+
+После прохождения процедуры приобретения товара программа вернется в основное меню.
+
+##### Работа с сервисным меню
+После выбора пункта 3 основного меню программа предлагает новое меню, для проведения действий обслуживания машины.
+
+1. Добавление товара. Необходимо указать код товара, его наименование, цену, а также количество:
+
+   ![image](https://github.com/tellusaflame/tellus_de_ta_2/assets/141950251/ec1e797a-4acf-41e1-bf17-caf8c24f3b1e)
+
+2. Изъятие товара. Полностью изымает всё доступное количетво товара. Необходимо указать номер позиции товара:
+
+   ![image](https://github.com/tellusaflame/tellus_de_ta_2/assets/141950251/f036f37c-63f0-48f5-944c-c86e1a8b5ec2)
+
+3. Внесение наличных. Добавляет указанное количетво купюр заданного номинала:
+
+   ![image](https://github.com/tellusaflame/tellus_de_ta_2/assets/141950251/f6c6e63f-ac23-44f4-9c40-215f7a59e700)
+
+4. Снятие наличных. Обнуляет содержимое значения количества для всех номиналов купюр:
+
+   ![image](https://github.com/tellusaflame/tellus_de_ta_2/assets/141950251/55969c89-fefe-4fa9-ad3b-d845804c7bb9)
+
+5. Выход в основное меню. 
+
+##### Транзакции
+Программа записывает результат всех произведенных транзакций в файл 'trancations.csv', расположенный в корне скрипта. Пример содержания файла:
+
+![image](https://github.com/tellusaflame/tellus_de_ta_2/assets/141950251/f6c1e7fc-38c2-4745-b130-7ee4e558d476)
+
