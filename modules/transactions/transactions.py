@@ -9,11 +9,11 @@ class Transaction:
     def __init__(
         self,
         trans_type: str,
-        item: Item,
-        cash: Money,
-        change: dict,
         result: bool,
         error: str,
+        change: dict = None,
+        item: Item = None,
+        cash: Money = None,
     ):
         self.timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.trans_type = trans_type

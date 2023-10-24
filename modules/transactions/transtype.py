@@ -1,4 +1,7 @@
-class TransType:
+from enum import Enum
+
+
+class TransType(Enum):
     """Class with list of transaction type prompts"""
 
     CUSTOMER_ADD_CASH = "Внесение наличных покупателем"

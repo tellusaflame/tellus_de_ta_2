@@ -10,6 +10,7 @@ class Merchant:
         self.vm = vm
 
     def select_options(self) -> int:
+        """Function to display merchant actions and process user input"""
         print("\nЧто вы хотите сделать?")
         print("1. Добавить товар")
 

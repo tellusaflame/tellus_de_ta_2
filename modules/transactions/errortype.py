@@ -1,4 +1,7 @@
-class ErrorType:
+from enum import Enum
+
+
+class ErrorType(Enum):
     """Class with list of transaction error type prompts"""
 
     NOK_LOW_CASH = "Недостаточно средств"

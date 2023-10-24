@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional
 from modules.vendingmachine.vendingmachine import VendingMachine
 from modules.vendingmachine.item import Item
 from modules.vendingmachine.money import Money
@@ -11,26 +11,27 @@ class Customer:
         self.vm = vm
         self.credit = 0
 
-    def select_item(self, selected_number: str) -> Union[Item, None]:
+    def select_item(self, selected_number: str) -> Optional[Item]:
         """Function to perform selection of desired goods of vending machine"""
         item = None
-
-        # selected_number = input("Please select desired product with its code number, or type 0 to exit:")
         while not item:
-            if selected_number.isdigit() and int(selected_number) == 0:
-                return None
-
-            if (
-                not selected_number.isdigit()
-                or int(selected_number) not in self.vm.items.keys()
-            ):
+            if not selected_number.isdigit():
                 selected_number = input(
                     "Некорректный ввод. Пожалуйста, укажите номер желаемого продукта, или введите 0 чтобы выйти:"
                 )
+                continue
 
-            elif int(selected_number) in self.vm.items.keys():
-                item = self.vm.select_item(int(selected_number))
-                return item
+            if int(selected_number) == 0:
+                return None
+
+            if int(selected_number) not in self.vm.items.keys():
+                selected_number = input(
+                    "Некорректный ввод. Пожалуйста, укажите номер желаемого продукта, или введите 0 чтобы выйти:"
+                )
+                continue
+
+            item = self.vm.select_item(int(selected_number))
+            return item
 
     def add_cash(self, money: Money):
         """Function to account customer adding cash to vending machine"""
