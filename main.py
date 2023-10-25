@@ -1,25 +1,24 @@
 import sys
 
-from modules.vendingmachine.vendingmachine import VendingMachine
-from modules.vendingmachine.customer import Customer
-from modules.vendingmachine.merchant import Merchant
-from modules.vendingmachine.money import Money
+from models.vendingmachine import VendingMachine
+from models.customer import Customer
+from models.merchant import Merchant
+from models.money import Money
 
 
 def main():
     """Main function to control all the interactions and vending machine entities"""
     vm = VendingMachine()
-
-    if not vm.check_startup_stock():
-        print(
-            f"Для работы машины недостаточно разменных купюр. Машина завершает работу. {vm.check_startup_stock()}"
-        )
-        sys.exit()
-
     vm.set_transactions_file()
 
     merchant = Merchant(vm)
     customer = Customer(vm)
+
+    if not vm.change_stock_available:
+        print(
+            "Для работы машины недостаточно разменных купюр. Машина завершает работу."
+        )
+        sys.exit()
 
     vm.vm_greeting()
 
@@ -60,7 +59,7 @@ def main():
         else:
             change = vm.calc_customer_change(vm.customer_credit)
             print(f"Спасибо за покупки! Вот ваша сдача: {change}")
-            vm.get_customer_change(change)
+            vm.withdraw_cash(is_customer=True, change=change)
             print("Всего хорошего. До свидания!")
             break
 
