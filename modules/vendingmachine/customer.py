@@ -11,27 +11,22 @@ class Customer:
         self.vm = vm
         self.credit = 0
 
-    def select_item(self, selected_number: str) -> Optional[Item]:
+    def select_item(self, selected_number: int) -> Optional[Item]:
         """Function to perform selection of desired goods of vending machine"""
-        item = None
-        while not item:
-            if not selected_number.isdigit():
-                selected_number = input(
-                    "Некорректный ввод. Пожалуйста, укажите номер желаемого продукта, или введите 0 чтобы выйти:"
-                )
-                continue
-
-            if int(selected_number) == 0:
+        while True:
+            if selected_number == 0:
                 return None
-
-            if int(selected_number) not in self.vm.items.keys():
-                selected_number = input(
-                    "Некорректный ввод. Пожалуйста, укажите номер желаемого продукта, или введите 0 чтобы выйти:"
-                )
-                continue
-
-            item = self.vm.select_item(int(selected_number))
-            return item
+            if selected_number not in self.vm.items.keys():
+                try:
+                    selected_number = int(
+                        input(
+                            "Некорректный ввод. Пожалуйста, укажите номер желаемого продукта, или введите 0 чтобы выйти:"
+                        )
+                    )
+                except ValueError:
+                    continue
+            else:
+                return self.vm.select_item(selected_number)
 
     def add_cash(self, money: Money):
         """Function to account customer adding cash to vending machine"""

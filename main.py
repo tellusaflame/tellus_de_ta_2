@@ -1,3 +1,5 @@
+import sys
+
 from modules.vendingmachine.vendingmachine import VendingMachine
 from modules.vendingmachine.customer import Customer
 from modules.vendingmachine.merchant import Merchant
@@ -7,6 +9,13 @@ from modules.vendingmachine.money import Money
 def main():
     """Main function to control all the interactions and vending machine entities"""
     vm = VendingMachine()
+
+    if not vm.check_startup_stock():
+        print(
+            f"Для работы машины недостаточно разменных купюр. Машина завершает работу. {vm.check_startup_stock()}"
+        )
+        sys.exit()
+
     vm.set_transactions_file()
 
     merchant = Merchant(vm)
@@ -45,22 +54,15 @@ def main():
 
         customer_item = customer.select_item(user_input)
 
-        if customer_item is None:
-            if vm.customer_credit > 0:
-                change = vm.calc_customer_change(vm.customer_credit)
-                if change is None:
-                    print(
-                        "Извините, в машине недостаточно сдачи. Пожалуйста, свяжитесь с владельцем машины, "
-                        "или позвоните 112."
-                    )
-                    break
-                print(f"Спасибо за покупки! Вот ваша сдача: {change}")
-                vm.get_customer_change(change)
-            else:
-                print("Всего хорошего. До свидания!")
-            break
+        if customer_item is not None:
+            print(f"Вы выбрали {customer_item.name}, цена = {customer_item.price}")
 
-        print(f"Вы выбрали {customer_item.name}, цена = {customer_item.price}")
+        else:
+            change = vm.calc_customer_change(vm.customer_credit)
+            print(f"Спасибо за покупки! Вот ваша сдача: {change}")
+            vm.get_customer_change(change)
+            print("Всего хорошего. До свидания!")
+            break
 
         while vm.check_customer_balance_enough(customer_item.price) is False:
             try:

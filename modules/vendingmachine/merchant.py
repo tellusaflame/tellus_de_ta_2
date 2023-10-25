@@ -9,7 +9,7 @@ class Merchant:
     def __init__(self, vm: VendingMachine):
         self.vm = vm
 
-    def select_options(self) -> int:
+    def select_options(self) -> str:
         """Function to display merchant actions and process user input"""
         print("\nЧто вы хотите сделать?")
         print("1. Добавить товар")
@@ -32,32 +32,40 @@ class Merchant:
 
     def add_item(self):
         """Function to add goods to vending machine"""
-        print("\nВведите параметры товара:")
+        while True:
+            print("\nВведите параметры товара:")
+            try:
+                item_code = int(input("Код: "))
+                if item_code <= 0:
+                    raise ValueError
 
-        item_code = input("Код: ")
-        while not item_code.isdigit():
-            print("Указано недействительное значение. Повторите ввод")
-            item_code = input("Код: ")
+                item_name = input("Наименование: ")
 
-        item_name = input("Наименование: ")
+                item_price = int(input("Цена: "))
+                if item_price <= 0:
+                    raise ValueError
 
-        item_price = input("Цена: ")
-        user_input_valid = self.vm.check_bill_denomination(user_input=item_price)
-        while not item_code.isdigit() or user_input_valid is False:
-            print("Указано недействительное значение. Повторите ввод.")
-            item_price = input("Цена: ")
-            user_input_valid = self.vm.check_bill_denomination(user_input=item_price)
+                user_input_valid = self.vm.check_bill_denomination(
+                    user_input=item_price
+                )
+                if not user_input_valid:
+                    raise ValueError
 
-        item_amount = input("Количество: ")
-        while not item_amount.isdigit():
-            print("Указано недействительное значение. Повторите ввод")
-            item_amount = input("Количество: ")
+                item_amount = int(input("Количество: "))
+                if item_amount <= 0:
+                    raise ValueError
+
+                break
+
+            except ValueError:
+                print("Указано недействительное значение. Повторите ввод")
+                continue
 
         item = Item(
-            code=int(item_code),
+            code=item_code,
             name=item_name,
-            price=int(item_price),
-            amount=int(item_amount),
+            price=item_price,
+            amount=item_amount,
         )
 
         self.vm.add_item(item)

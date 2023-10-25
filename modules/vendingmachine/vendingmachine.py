@@ -1,6 +1,6 @@
 import csv
 import os
-from typing import Union
+from typing import Union, Optional
 from dotenv import load_dotenv
 from modules.vendingmachine.item import Item
 from modules.vendingmachine.money import Money
@@ -22,14 +22,14 @@ class VendingMachine:
         }
 
         self.change = {
-            5000: Money(bill=5000, amount=5),
-            2000: Money(bill=2000, amount=5),
-            1000: Money(bill=1000, amount=5),
-            500: Money(bill=500, amount=5),
-            200: Money(bill=200, amount=5),
-            100: Money(bill=100, amount=5),
-            50: Money(bill=50, amount=5),
-            10: Money(bill=10, amount=5),
+            5000: Money(bill=5000, amount=0),
+            2000: Money(bill=2000, amount=20),
+            1000: Money(bill=1000, amount=20),
+            500: Money(bill=500, amount=20),
+            200: Money(bill=200, amount=20),
+            100: Money(bill=100, amount=20),
+            50: Money(bill=50, amount=20),
+            10: Money(bill=10, amount=20),
         }
 
         self.balance = self.get_balance()
@@ -39,7 +39,14 @@ class VendingMachine:
         self.transactions = {}
         self.transaction_counter = 0
 
-        self.merchant_secret = os.getenv("MERCHANT_CODE")
+        self.merchant_secret = int(os.getenv("MERCHANT_CODE"))
+
+    def check_startup_stock(self) -> bool:
+        """Checks if machine have enough change to serve customer"""
+        for money in self.change.values():
+            if money.bill < 5000 and money.amount < 20:
+                return False
+        return True
 
     def vm_greeting(self):
         """Greeting message from vending machine"""
@@ -47,17 +54,20 @@ class VendingMachine:
 
     def check_customer_merchant(self):
         """Checks user input to determine if secret code for merchant actions were passed"""
-        user_input = input(
-            "\n"
-            "Пожалуйста, укажите номер желаемого продукта, или введите 0 чтобы выйти:"
-        )
-        # if user_input == self.merchant_secret:
+        try:
+            user_input = int(
+                input(
+                    "Пожалуйста, укажите номер желаемого продукта, или введите 0 чтобы выйти:"
+                )
+            )
+        except ValueError:
+            return False, -1
         return user_input == self.merchant_secret, user_input
 
     def show_items(self):
         """Function to print all the available goods"""
         print(
-            f"\n{'#':^1} | {'Название':^10} | {'Цена':^10} | {'Доступно':^5}\n{'-'*40}"
+            f"\n{'#':^1} | {'Название':^10} | {'Цена':^10} | {'Доступно':^5}\n{'-' * 40}"
         )
         for item in self.items.values():
             item_string = f"{item.code:^1} | {item.name:^10} | {item.price:^10} | {item.amount:^5}"
@@ -75,18 +85,19 @@ class VendingMachine:
         print(f"Ваш баланс равен {self.customer_credit}")
 
         self.add_transaction(
-            Transaction(
-                trans_type=TransType.CUSTOMER_ADD_CASH.value,
-                cash=Money(bill=money.bill, amount=1),
-                result=True,
-                error=ErrorType.OK_ADD_CASH.value,
-            )
+            trans_type=TransType.CUSTOMER_ADD_CASH.value,
+            cash=Money(bill=money.bill, amount=1),
+            result=True,
+            error=ErrorType.OK_ADD_CASH.value,
         )
 
-    def calc_customer_change(self, total_change: int) -> Union[dict, None]:
+    def calc_customer_change(self, total_change: int) -> Optional[Union[dict, int]]:
         """Function to calculate and control customer change"""
         customer_change = {}
         actual_change = 0
+
+        if total_change == 0:
+            return 0
 
         for money in self.change.values():
             temp_amount = money.amount
@@ -103,10 +114,19 @@ class VendingMachine:
 
         return customer_change
 
-    def get_customer_change(self, customer_change: dict):
+    def get_customer_change(self, customer_change: Union[dict, int]):
         """Function to process customer change"""
+        if isinstance(customer_change, int):
+            return
         for bill, amount in customer_change.items():
             self.change[bill].amount -= amount
+
+        self.add_transaction(
+            trans_type=TransType.CUSTOMER_GIVE_CHANGE.value,
+            change=customer_change,
+            result=True,
+            error=ErrorType.OK_ADD_CASH.value,
+        )
 
     def buy_item(self, item: Item):
         """Function to perform an account of position to buy"""
@@ -116,18 +136,16 @@ class VendingMachine:
         self.customer_credit -= item.price
 
         self.add_transaction(
-            Transaction(
-                trans_type=TransType.CUSTOMER_BUY_ITEM.value,
-                item=item,
-                result=True,
-                error=ErrorType.OK_BUY.value,
-            )
+            trans_type=TransType.CUSTOMER_BUY_ITEM.value,
+            item=item,
+            result=True,
+            error=ErrorType.OK_BUY.value,
         )
 
     def set_transactions_file(self):
         """Creates transaction file with predefined columns"""
         with open(
-            "transactions.csv", mode="w", newline="", encoding="windows-1251"
+            "transactions.csv", mode="w", newline="", encoding="utf-8-sig"
         ) as file:
             writer = csv.writer(file, delimiter=";")
 
@@ -148,14 +166,37 @@ class VendingMachine:
                 ]
             )
 
-    def add_transaction(self, transaction):
-        """Function to track all important vending machine transactions"""
+    def _add_transaction(
+        self,
+        trans_type: str,
+        result: bool,
+        error: str,
+        change: Optional[dict],
+        item: Optional[Item],
+        cash: Optional[Money],
+    ):
+        """Method to return transaction object with passed arguments"""
+        return Transaction(
+            trans_type=trans_type,
+            item=item,
+            cash=cash,
+            change=change,
+            result=result,
+            error=error,
+        )
 
+    def add_transaction(
+        self, trans_type, result, error, change=None, item=None, cash=None
+    ):
+        """Function to track all important vending machine transactions"""
+        transaction = self._add_transaction(
+            trans_type, result, error, change, item, cash
+        )
         self.transactions[self.transaction_counter] = transaction
         self.transaction_counter += 1
 
         with open(
-            "transactions.csv", mode="a", newline="", encoding="windows-1251"
+            "transactions.csv", mode="a", newline="", encoding="utf-8-sig"
         ) as file:
             writer = csv.writer(file, delimiter=";")
 
@@ -184,11 +225,8 @@ class VendingMachine:
         """Greeting message from vending machine for merchant actions"""
         print("\nДобро пожаловать в режим обслуживания!")
 
-    def check_bill_denomination(self, user_input: str) -> bool:
+    def check_bill_denomination(self, user_input: int) -> bool:
         """Function to check if item price is correct"""
-        if not user_input.isdigit():
-            return False
-
         for money in self.change.values():
             result = int(user_input) % money.bill == 0
         return result
@@ -201,12 +239,10 @@ class VendingMachine:
         self.show_items()
 
         self.add_transaction(
-            Transaction(
-                trans_type=TransType.MERCHANT_ADD_ITEM.value,
-                item=item,
-                result=True,
-                error=ErrorType.OK_ADD_ITEM.value,
-            )
+            trans_type=TransType.MERCHANT_ADD_ITEM.value,
+            item=item,
+            result=True,
+            error=ErrorType.OK_ADD_ITEM.value,
         )
 
     def remove_item(self, item: Item):
@@ -215,12 +251,10 @@ class VendingMachine:
         print(f"Товар #{item.code} - {item.name} был успешно изъят!")
 
         self.add_transaction(
-            Transaction(
-                trans_type=TransType.MERCHANT_REMOVE_ITEM.value,
-                item=item,
-                result=True,
-                error=ErrorType.OK_REMOVE_ITEM.value,
-            )
+            trans_type=TransType.MERCHANT_REMOVE_ITEM.value,
+            item=item,
+            result=True,
+            error=ErrorType.OK_REMOVE_ITEM.value,
         )
 
     def get_balance(self) -> int:
@@ -243,12 +277,10 @@ class VendingMachine:
         print(f"Купюры были внесены: номинал {money.bill}, количество {money.amount}")
 
         self.add_transaction(
-            Transaction(
-                trans_type=TransType.MERCHANT_ADD_CASH.value,
-                change={money.bill, money.amount},
-                result=True,
-                error=ErrorType.OK_ADD_CASH.value,
-            )
+            trans_type=TransType.MERCHANT_ADD_CASH.value,
+            cash=Money(bill=money.bill, amount=money.amount),
+            result=True,
+            error=ErrorType.OK_ADD_CASH.value,
         )
 
     def withdraw_cash(self):
@@ -258,12 +290,10 @@ class VendingMachine:
             temp_change[money.bill] = money.amount
 
         self.add_transaction(
-            Transaction(
-                trans_type=TransType.MERCHANT_WITHDRAW.value,
-                change=temp_change,
-                result=True,
-                error=ErrorType.OK_WITHDRAW.value,
-            )
+            trans_type=TransType.MERCHANT_WITHDRAW.value,
+            change=temp_change,
+            result=True,
+            error=ErrorType.OK_WITHDRAW.value,
         )
 
         for money in self.change.values():
