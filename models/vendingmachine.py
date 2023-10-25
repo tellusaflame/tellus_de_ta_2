@@ -50,7 +50,19 @@ class VendingMachine:
 
     def vm_greeting(self):
         """Greeting message from vending machine"""
-        print("Здравствуйте! Ниже список товаров, доступных к покупке: ")
+        print("Добро пожаловать в вендинговую машину!")
+
+    def check_if_service_menu(self):
+        while True:
+            try:
+                user_input = int(
+                    input(
+                        "Работы машины ограничена - недостаточно средств размена. Введите сервисный код: "
+                    )
+                )
+            except ValueError:
+                continue
+            return user_input == self.merchant_secret
 
     def check_customer_merchant(self):
         """Checks user input to determine if secret code for merchant actions were passed"""
@@ -269,6 +281,8 @@ class VendingMachine:
             error=ErrorType.OK_ADD_CASH.value,
         )
 
+        self.change_stock_available = self.check_stock()
+
     def withdraw_cash(self, is_customer: bool, change: Union[dict, int] = 0):
         """Function to perform cash withdraw"""
         if is_customer:
@@ -299,6 +313,7 @@ class VendingMachine:
                 money.amount = 0
 
             print("\nДеньги были успешно изъяты.")
+            self.change_stock_available = False
 
     def select_item(self, product_code: int):
         """Function to return data of selected goods"""

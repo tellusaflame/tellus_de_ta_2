@@ -14,18 +14,15 @@ def main():
     merchant = Merchant(vm)
     customer = Customer(vm)
 
-    if not vm.change_stock_available:
-        print(
-            "Для работы машины недостаточно разменных купюр. Машина завершает работу."
-        )
-        sys.exit()
-
     vm.vm_greeting()
 
     while True:
-        vm.show_items()
 
-        is_merchant, user_input = vm.check_customer_merchant()
+        if not vm.change_stock_available:
+            is_merchant = vm.check_if_service_menu()
+        else:
+            vm.show_items()
+            is_merchant, user_input = vm.check_customer_merchant()
 
         if is_merchant:
             vm.greeting_merchant()
@@ -49,6 +46,8 @@ def main():
 
                 elif choice == "6":
                     break
+            continue
+        elif not vm.change_stock_available:
             continue
 
         customer_item = customer.select_item(user_input)
